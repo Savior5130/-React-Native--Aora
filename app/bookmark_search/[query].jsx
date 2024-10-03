@@ -1,24 +1,25 @@
-import React, { useState } from "react";
-import { View, Text, FlatList, RefreshControl } from "react-native";
+import { View, Text, FlatList } from "react-native";
+import React, { useEffect, useState } from "react";
+import { useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StatusBar } from "expo-status-bar";
-import EmptyState from "../../components/EmptyState";
+import { getSavedPosts, searchPosts } from "../../lib/appwrite";
 import useAppwrite from "../../lib/useAppwrite";
-import { getSavedPosts } from "../../lib/appwrite";
-import SearchInput from "../../components/SearchInput";
-import { useGlobalContext } from "../../context/GlobalProvider";
 import VideoCard from "../../components/VideoCard";
+import { StatusBar } from "expo-status-bar";
+import SearchInput from "../../components/SearchInput";
+import EmptyState from "../../components/EmptyState";
+import { useGlobalContext } from "../../context/GlobalProvider";
 
-const Bookmark = () => {
+const BookmarkSearch = () => {
   const { user } = useGlobalContext();
-  const { data: posts, refetch } = useAppwrite(() => getSavedPosts(user.$id));
-  const [refreshing, setRefreshing] = useState(false);
+  const { query } = useLocalSearchParams();
+  const { data: posts, refetch } = useAppwrite(() =>
+    getSavedPosts(user.$id, query)
+  );
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await refetch();
-    setRefreshing(false);
-  };
+  useEffect(() => {
+    refetch(user.$id, query);
+  }, [query]);
 
   return (
     <SafeAreaView className="bg-primary h-full">
@@ -28,12 +29,13 @@ const Bookmark = () => {
         renderItem={({ item }) => <VideoCard video={item} />}
         ListHeaderComponent={() => (
           <View className="my-6 px-4">
-            <Text className="text-2xl font-psemibold text-white">
-              Saved Videos
+            <Text className="font-pmedium text-sm text-gray-100">
+              Search Results
             </Text>
+            <Text className="text-2xl font-psemibold text-white">{query}</Text>
 
             <View className="mt-6 mb-8">
-              <SearchInput type={"bookmark"} />
+              <SearchInput initialQuery={query} />
             </View>
           </View>
         )}
@@ -43,13 +45,10 @@ const Bookmark = () => {
             subtitle="No videos found for this search query"
           />
         )}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
       />
       <StatusBar backgroundColor="#161622" style="light" />
     </SafeAreaView>
   );
 };
 
-export default Bookmark;
+export default BookmarkSearch;

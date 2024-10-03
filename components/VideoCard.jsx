@@ -2,16 +2,18 @@ import { View, Text, Image, TouchableOpacity } from "react-native";
 import React, { useState } from "react";
 import { icons } from "../constants";
 import { ResizeMode, Video } from "expo-av";
+import { useGlobalContext } from "../context/GlobalProvider";
+import { bookmarkVideo } from "../lib/appwrite";
 
-const VideoCard = ({
-  video: {
-    title,
-    thumbnail,
-    video,
-    creator: { username, avatar },
-  },
-}) => {
+const VideoCard = ({ video: item }) => {
+  const { user } = useGlobalContext();
   const [play, setPlay] = useState(false);
+  const { title, thumbnail, video, creator } = item;
+  const { username, avatar } = creator;
+
+  const bookmark = async () => {
+    await bookmarkVideo(item, user.$id);
+  };
 
   return (
     <View className="flex-col items-center px-4 mb-14">
@@ -41,7 +43,14 @@ const VideoCard = ({
           </View>
         </View>
 
-        <View className="pt-2">
+        <View className="flex-row pt-2 gap-4">
+          <TouchableOpacity onPress={bookmark}>
+            <Image
+              source={icons.bookmark}
+              className="w-5 h-5"
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
           <Image source={icons.menu} className="w-5 h-5" resizeMode="contain" />
         </View>
       </View>

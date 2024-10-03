@@ -10,7 +10,7 @@ import React, { useState } from "react";
 import { icons } from "../constants";
 import { router, usePathname } from "expo-router";
 
-const SearchInput = ({ initialQuery }) => {
+const SearchInput = ({ initialQuery, type }) => {
   const pathname = usePathname();
   const [query, setQuery] = useState(initialQuery || "");
 
@@ -32,9 +32,19 @@ const SearchInput = ({ initialQuery }) => {
               "Please input something to search results across database"
             );
           }
+          switch (type) {
+            case "search":
+              if (pathname.startsWith("/search")) router.setParams({ query });
+              else router.push(`/search/${query}`);
+              break;
 
-          if (pathname.startsWith("/search")) router.setParams({ query });
-          else router.push(`/search/${query}`);
+            case "bookmark":
+              if (pathname.startsWith("/bookmark_search"))
+                router.setParams({ query });
+              else router.push(`/bookmark_search/${query}`);
+
+              break;
+          }
         }}
       >
         <Image source={icons.search} className="w-5 h-5" resizeMode="contain" />

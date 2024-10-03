@@ -25,6 +25,7 @@ const Create = () => {
     video: null,
     thumbnail: null,
     prompt: "",
+    saved_by: [],
   });
 
   const openPicker = async (selectType) => {
